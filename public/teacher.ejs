@@ -1,112 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Teacher Dashboard</title>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Teacher Dashboard</h1>
     <div id="create-quiz">
-        <h2>Create a Quiz</h2>
-        <form id="quiz-form">
-            <input type="text" id="quiz-title" placeholder="Quiz Title" required>
-            <div id="questions-container">
-                <div class="question">
+      <h2>Create a Quiz</h2>
+      <form id="quiz-form">
+        <div id="questions-container">
+          <!-- Questions will be added here -->
+        </div>
+        <button type="submit">Create Quiz</button>
+      </form>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const quizForm = document.getElementById("quiz-form");
+        const questionsContainer = document.getElementById(
+          "questions-container"
+        );
+
+        function addQuestionField() {
+          const questionDiv = document.createElement("div");
+          questionDiv.classList.add("question");
+          questionDiv.innerHTML = `
                     <input type="text" class="question-text" placeholder="Question" required>
                     <input type="text" class="option" placeholder="Option 1" required>
                     <input type="text" class="option" placeholder="Option 2" required>
                     <input type="text" class="option" placeholder="Option 3" required>
                     <input type="text" class="option" placeholder="Option 4" required>
                     <input type="text" class="correct-answer" placeholder="Correct Answer" required>
-                </div>
-            </div>
-            <button type="button" id="add-question">Add Question</button>
-            <button type="submit">Create Quiz</button>
-        </form>
-    </div>
-</body>
-</html>
-<script>document.addEventListener('DOMContentLoaded', () => {
-    const quizForm = document.getElementById('quiz-form');
-    const addQuestionButton = document.getElementById('add-question');
-    const questionsContainer = document.getElementById('questions-container');
-
-    // Function to add a question field
-    const addQuestionField = () => {
-        const questionDiv = document.createElement('div');
-        questionDiv.classList.add('question');
-
-        const questionInput = document.createElement('input');
-        questionInput.type = 'text';
-        questionInput.classList.add('question-text');
-        questionInput.placeholder = 'Question';
-        questionInput.required = true;
-        questionDiv.appendChild(questionInput);
-
-        for (let i = 1; i <= 4; i++) {
-            const optionInput = document.createElement('input');
-            optionInput.type = 'text';
-            optionInput.classList.add('option');
-            optionInput.placeholder = `Option ${i}`;
-            optionInput.required = true;
-            questionDiv.appendChild(optionInput);
+                `;
+          questionsContainer.appendChild(questionDiv);
         }
 
-        const correctAnswerInput = document.createElement('input');
-        correctAnswerInput.type = 'text';
-        correctAnswerInput.classList.add('correct-answer');
-        correctAnswerInput.placeholder = 'Correct Answer';
-        correctAnswerInput.required = true;
-        questionDiv.appendChild(correctAnswerInput);
+        addQuestionField();
 
-        questionsContainer.appendChild(questionDiv);
-    };
+        quizForm.addEventListener("submit", (e) => {
+          e.preventDefault();
 
-    // Add initial question field
-    addQuestionField();
+          const questions = [];
+          const questionElements = document.querySelectorAll(".question");
 
-    // Event listener to add more question fields
-    addQuestionButton.addEventListener('click', addQuestionField);
+          for (let questionElement of questionElements) {
+            const questionText =
+              questionElement.querySelector(".question-text").value;
+            const options = [];
+            for (let optionElement of questionElement.querySelectorAll(
+              ".option"
+            )) {
+              options.push(optionElement.value);
+            }
+            const correctAnswer =
+              questionElement.querySelector(".correct-answer").value;
 
-    // Event listener to handle form submission
-    quizForm.addEventListener('submit', (e) => {
-        e.preventDefault();
+            if (questionText && options.length === 4 && correctAnswer) {
+              questions.push({
+                question: questionText,
+                options: options,
+                answer: correctAnswer,
+              });
+            }
+          }
 
-        const quizTitle = document.getElementById('quiz-title').value;
-        const questions = [];
-        const questionElements = document.querySelectorAll('.question');
+          if (questions.length === 0) {
+            alert("Please add at least one question.");
+            return;
+          }
 
-        questionElements.forEach(questionElement => {
-            const questionText = questionElement.querySelector('.question-text').value;
-            const options = Array.from(questionElement.querySelectorAll('.option')).map(option => option.value);
-            const correctAnswer = questionElement.querySelector('.correct-answer').value;
-
-            questions.push({ question: questionText, options, answer: correctAnswer });
+          fetch("http://localhost:3000/add-quiz", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ questions }),
+          })
+            .then((response) => response.json())
+            .then(() => {
+              alert("Quiz created successfully!");
+              quizForm.reset();
+              questionsContainer.innerHTML = "";
+              addQuestionField();
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
         });
-
-        const newQuiz = {
-            id: Date.now(),
-            title: quizTitle,
-            questions
-        };
-
-        fetch('/add-quiz', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(newQuiz)
-        })
-        .then(response => response.json())
-        .then(data => {
-            alert('Quiz created successfully!');
-            quizForm.reset();
-            questionsContainer.innerHTML = '';
-            addQuestionField(); // Add one question field by default
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-    });
-});
-</script>
+      });
+    </script>
+  </body>
+</html>

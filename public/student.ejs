@@ -9,7 +9,6 @@
     <div id="quiz-selection">
         <h2>Available Quizzes</h2>
         <div id="quiz-list">
-            <!-- Quiz titles and start buttons will be populated here -->
         </div>
     </div>
     <div id="quiz-container" style="display:none;">
@@ -50,10 +49,6 @@
                 const quizDiv = document.createElement('div');
                 quizDiv.classList.add('quiz');
 
-                const quizTitle = document.createElement('h3');
-                quizTitle.textContent = quiz.title;
-                quizDiv.appendChild(quizTitle);
-
                 const startButton = document.createElement('button');
                 startButton.textContent = 'Start Quiz';
                 startButton.addEventListener('click', () => startQuiz(quiz));
@@ -68,7 +63,6 @@
     const startQuiz = (quiz) => {
         console.log('Starting quiz:', quiz);
         currentQuiz = quiz;
-        document.getElementById('quiz-title').textContent = currentQuiz.title;
         questionsContainer.innerHTML = '';
         currentQuiz.questions.forEach((question, index) => {
             const questionDiv = document.createElement('div');
