@@ -1,166 +1,211 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Dashboard</title>
-</head>
-<body>
-    <a href="http://localhost:3000/">Back</a>
-    <a href="http://localhost:3000/student">Student</a>
-    <a href="http://localhost:3000/teacher">Teacher</a>
-    <a href="http://localhost:3000/admin">Admin</a>
-    <h1>Admin Dashboard</h1>
-    <div id="create-user">
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="container">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="http://localhost:3000/">Back</a>
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="http://localhost:3000/student">Student</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="http://localhost:3000/teacher">Teacher</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="http://localhost:3000/admin">Admin</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <h1 class="my-4">Admin Dashboard</h1>
+
+    <div class="card mb-4">
+      <div class="card-header">
         <h2>Create a User</h2>
+      </div>
+      <div class="card-body">
         <form id="user-form">
-            <input type="text" id="user-name" placeholder="User Name" required />
-            <select id="user-role" required>
-                <option value="" disabled selected>Select Role</option>
-                <option value="teacher">Teacher</option>
-                <option value="admin">Admin</option>
-                <option value="student">Student</option>
+          <div class="form-group">
+            <input
+              type="text"
+              id="user-name"
+              class="form-control"
+              placeholder="User Name"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <select id="user-role" class="form-control" required>
+              <option value="" disabled selected>Select Role</option>
+              <option value="teacher">Teacher</option>
+              <option value="admin">Admin</option>
+              <option value="student">Student</option>
             </select>
-            <button type="submit">Create User</button>
+          </div>
+          <button type="submit" class="btn btn-primary">Create User</button>
         </form>
+      </div>
     </div>
-    <div id="show-users">
+
+    <div class="card mb-4">
+      <div class="card-header">
         <h2>Users List</h2>
-        <div id="users-container"></div>
+      </div>
+      <div class="card-body" id="users-container">
+        <!-- User list will be populated here -->
+      </div>
     </div>
-    <div id="show-quizzes">
+
+    <div class="card mb-4">
+      <div class="card-header">
         <h2>Quizzes List</h2>
-        <div id="quizzes-container"></div>
+      </div>
+      <div class="card-body" id="quizzes-container">
+        <!-- Quiz list will be populated here -->
+      </div>
     </div>
-</body>
-</html>
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const userForm = document.getElementById("user-form");
-    const usersContainer = document.getElementById("users-container");
-    const quizzesContainer = document.getElementById("quizzes-container");
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const userForm = document.getElementById("user-form");
+        const usersContainer = document.getElementById("users-container");
+        const quizzesContainer = document.getElementById("quizzes-container");
 
-    let totalUsers = 0;
+        let totalUsers = 0;
 
-    function displayUsers() {
-        fetch("http://localhost:3000/users", {
+        function displayUsers() {
+          fetch("http://localhost:3000/users", {
             method: "GET",
-        })
-        .then((response) => response.json())
-        .then((users) => {
-            usersContainer.innerHTML = "";
-            users.forEach((user) => {
+          })
+            .then((response) => response.json())
+            .then((users) => {
+              usersContainer.innerHTML = "";
+              users.forEach((user) => {
                 totalUsers++;
                 const userDiv = document.createElement("div");
-                userDiv.textContent = `ID: ${user.id}, Name: ${user.name}, Role: ${user.role}`;
+                userDiv.className =
+                  "d-flex justify-content-between align-items-center mb-2";
+                userDiv.innerHTML = `
+                            <span>ID: ${user.id}, Name: ${user.name}, Role: ${user.role}</span>
+                            <button class="btn btn-danger btn-sm">Delete</button>
+                        `;
 
-                const deleteButton = document.createElement("button");
-                deleteButton.textContent = "Delete";
-                deleteButton.addEventListener("click", () => deleteUser(user.id));
-                userDiv.appendChild(deleteButton);
-
+                const deleteButton = userDiv.querySelector("button");
+                deleteButton.addEventListener("click", () =>
+                  deleteUser(user.id)
+                );
                 usersContainer.appendChild(userDiv);
+              });
+            })
+            .catch((error) => {
+              console.error("Error fetching users:", error);
             });
-        })
-        .catch((error) => {
-            console.error("Error fetching users:", error);
-        });
-    }
+        }
 
-    function displayQuizzes() {
-        fetch("http://localhost:3000/quizzes", {
+        function displayQuizzes() {
+          fetch("http://localhost:3000/quizzes", {
             method: "GET",
-        })
-        .then((response) => response.json())
-        .then((quizzes) => {
-          console.log(quizzes[0]);
-          const quizArray = quizzes[0];
-            quizzesContainer.innerHTML = "";
-            // let index = 0;
-            quizArray.questions.forEach((quiz,index) => {
-              console.log(quizArray.questions[index].question);
+          })
+            .then((response) => response.json())
+            .then((quizzes) => {
+              const quizArray = quizzes[0];
+              quizzesContainer.innerHTML = "";
+              quizArray.questions.forEach((quiz, index) => {
                 const quizDiv = document.createElement("div");
-                quizDiv.textContent = `ID: ${quizArray.questions[index].QID}, Questions: ${quizArray.questions[index].question}`;
+                quizDiv.className =
+                  "d-flex justify-content-between align-items-center mb-2";
+                quizDiv.innerHTML = `
+                            <span>ID: ${quiz.QID}, Question: ${quiz.question}</span>
+                            <button class="btn btn-danger btn-sm">Delete</button>
+                        `;
 
-                const deleteButton = document.createElement("button");
-                deleteButton.textContent = "Delete";
-                // console.log(quizArray.questions[index].QID);
-                deleteButton.addEventListener("click", () => deleteQuiz(quizArray.questions[index].QID));
-                quizDiv.appendChild(deleteButton);
-
+                const deleteButton = quizDiv.querySelector("button");
+                deleteButton.addEventListener("click", () =>
+                  deleteQuiz(quiz.QID)
+                );
                 quizzesContainer.appendChild(quizDiv);
-                // index++;
+              });
+            })
+            .catch((error) => {
+              console.error("Error fetching quizzes:", error);
             });
-        })
-        .catch((error) => {
-            console.error("Error fetching quizzes:", error);
-        });
-    }
+        }
 
-    userForm.addEventListener("submit", (e) => {
-        e.preventDefault();
+        userForm.addEventListener("submit", (e) => {
+          e.preventDefault();
 
-        const userName = document.getElementById("user-name").value;
-        const userRole = document.getElementById("user-role").value;
+          const userName = document.getElementById("user-name").value;
+          const userRole = document.getElementById("user-role").value;
 
-        const newUser = {
+          const newUser = {
             id: totalUsers + 1,
             role: userRole,
             name: userName,
-        };
+          };
 
-        fetch("/add-user", {
+          fetch("/add-user", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
+              "Content-Type": "application/json",
             },
             body: JSON.stringify(newUser),
-        })
-        .then((response) => response.json())
-        .then((data) => {
-            userForm.reset();
-            displayUsers();
-        })
-        .catch((error) => {
-            console.error("Error:", error);
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              userForm.reset();
+              displayUsers();
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
         });
-    });
 
-    function deleteUser(userId) {
-        fetch(`/delete-user`, {
+        function deleteUser(userId) {
+          fetch(`/delete-user`, {
             method: "DELETE",
             headers: {
-                "Content-Type": "application/json",
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({ id: userId }),
-        })
-        .then((response) => response.json())
-        .then((data) => {
-            displayUsers();
-        })
-        .catch((error) => {
-            console.error("Error:", error);
-        });
-    }
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              displayUsers();
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
+        }
 
-    function deleteQuiz(quizId) {
-        fetch(`/delete-quiz`, {
+        function deleteQuiz(quizId) {
+          fetch(`/delete-quiz`, {
             method: "DELETE",
             headers: {
-                "Content-Type": "application/json",
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({ id: quizId }),
-        })
-        .then((response) => response.json())
-        .then((data) => {
-            displayQuizzes();
-        })
-        .catch((error) => {
-            console.error("Error:", error);
-        });
-    }
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              displayQuizzes();
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
+        }
 
-    displayUsers();
-    displayQuizzes();
-});
-</script>
+        displayUsers();
+        displayQuizzes();
+      });
+    </script>
+  </body>
+</html>

@@ -11,9 +11,9 @@ module.exports = {
             "name": "test"
         },
         {
-            "id": 3,
+            "id": 6,
             "role": "teacher",
-            "name": "a"
+            "name": "test"
         }
     ]
 }

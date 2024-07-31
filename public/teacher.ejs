@@ -1,98 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
+<head>
+    <meta charset="UTF-8">
     <title>Teacher Dashboard</title>
-  </head>
-  <body>
-    <a href="http://localhost:3000/">Back</a>
-    <a href="http://localhost:3000/student">Student</a>
-    <a href="http://localhost:3000/teacher">Teacher</a>
-    <a href="http://localhost:3000/admin">Admin</a>
-    <h1>Teacher Dashboard</h1>
-    <div id="create-quiz">
-      <h2>Create a Quiz</h2>
-      <form id="quiz-form">
-        <div id="questions-container">
-          <!-- Questions will be added here -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+        <a class="navbar-brand" href="http://localhost:3000/">Back</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item"><a class="nav-link" href="http://localhost:3000/student">Student</a></li>
+                <li class="nav-item"><a class="nav-link" href="http://localhost:3000/teacher">Teacher</a></li>
+                <li class="nav-item"><a class="nav-link" href="http://localhost:3000/admin">Admin</a></li>
+            </ul>
         </div>
-        <button type="submit">Create Quiz</button>
-      </form>
+    </nav>
+
+    <h1 class="mb-4">Teacher Dashboard</h1>
+
+    <div id="create-quiz" class="card p-4">
+        <h2 class="card-title">Create a Quiz</h2>
+        <form id="quiz-form">
+            <div id="questions-container" class="mb-3">
+                <!-- Questions will be added here -->
+            </div>
+            <button type="submit" class="btn btn-primary">Create Quiz</button>
+        </form>
     </div>
 
     <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const quizForm = document.getElementById("quiz-form");
-        const questionsContainer = document.getElementById(
-          "questions-container"
-        );
+        document.addEventListener("DOMContentLoaded", () => {
+            const quizForm = document.getElementById("quiz-form");
+            const questionsContainer = document.getElementById("questions-container");
 
-        function addQuestionField() {
-          const questionDiv = document.createElement("div");
-          questionDiv.classList.add("question");
-          questionDiv.innerHTML = `
-                    <input type="text" class="question-text" placeholder="Question" required>
-                    <input type="text" class="option" placeholder="Option 1" required>
-                    <input type="text" class="option" placeholder="Option 2" required>
-                    <input type="text" class="option" placeholder="Option 3" required>
-                    <input type="text" class="option" placeholder="Option 4" required>
-                    <input type="text" class="correct-answer" placeholder="Correct Answer" required>
+            function addQuestionField() {
+                const questionDiv = document.createElement("div");
+                questionDiv.classList.add("question", "form-group", "border", "p-3", "mb-3");
+                questionDiv.innerHTML = `
+                    <input type="text" class="form-control mb-2 question-text" placeholder="Question" required>
+                    <input type="text" class="form-control mb-2 option" placeholder="Option 1" required>
+                    <input type="text" class="form-control mb-2 option" placeholder="Option 2" required>
+                    <input type="text" class="form-control mb-2 option" placeholder="Option 3" required>
+                    <input type="text" class="form-control mb-2 option" placeholder="Option 4" required>
+                    <input type="text" class="form-control mb-2 correct-answer" placeholder="Correct Answer" required>
                 `;
-          questionsContainer.appendChild(questionDiv);
-        }
-
-        addQuestionField();
-
-        quizForm.addEventListener("submit", (e) => {
-          e.preventDefault();
-
-          const questions = [];
-          const questionElements = document.querySelectorAll(".question");
-
-          for (let questionElement of questionElements) {
-            const questionText =
-              questionElement.querySelector(".question-text").value;
-            const options = [];
-            for (let optionElement of questionElement.querySelectorAll(
-              ".option"
-            )) {
-              options.push(optionElement.value);
+                questionsContainer.appendChild(questionDiv);
             }
-            const correctAnswer =
-              questionElement.querySelector(".correct-answer").value;
 
-            if (questionText && options.length === 4 && correctAnswer) {
-              questions.push({
-                QID: Math.floor(Math. random() * (500 - 100) + 100),
-                question: questionText,
-                options: options,
-                answer: correctAnswer,
-              });
-            }
-          }
+            addQuestionField();
 
-          if (questions.length === 0) {
-            alert("Please add at least one question.");
-            return;
-          }
+            
 
-          fetch("http://localhost:3000/add-quiz", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ questions }),
-          })
-            .then((response) => response.json())
-            .then(() => {
-              alert("Quiz created successfully!");
-              quizForm.reset();
-              questionsContainer.innerHTML = "";
-              addQuestionField();
-            })
-            .catch((error) => {
-              console.error("Error:", error);
+            quizForm.addEventListener("submit", (e) => {
+                e.preventDefault();
+
+                const questions = [];
+                const questionElements = document.querySelectorAll(".question");
+
+                for (let questionElement of questionElements) {
+                    const questionText = questionElement.querySelector(".question-text").value;
+                    const options = [];
+                    for (let optionElement of questionElement.querySelectorAll(".option")) {
+                        options.push(optionElement.value);
+                    }
+                    const correctAnswer = questionElement.querySelector(".correct-answer").value;
+
+                    if (questionText && options.length === 4 && correctAnswer) {
+                        questions.push({
+                            QID: Math.floor(Math.random() * (500 - 100) + 100),
+                            question: questionText,
+                            options: options,
+                            answer: correctAnswer,
+                        });
+                    }
+                }
+
+                if (questions.length === 0) {
+                    alert("Please add at least one question.");
+                    return;
+                }
+
+                fetch("http://localhost:3000/add-quiz", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ questions }),
+                })
+                .then((response) => response.json())
+                .then(() => {
+                    alert("Quiz created successfully!");
+                    quizForm.reset();
+                    questionsContainer.innerHTML = "";
+                    addQuestionField();
+                    
+                })
+                .catch((error) => {
+                    console.error("Error:", error);
+                });
             });
         });
-      });
     </script>
-  </body>
+</body>
 </html>

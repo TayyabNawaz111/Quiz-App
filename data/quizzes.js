@@ -37,17 +37,6 @@ module.exports = {
                     "answer": "1947"
                 },
                 {
-                    "QID": "4",
-                    "question": "Which city is known as the \"City of Lights\"?",
-                    "options": [
-                        "Lahore",
-                        "Karachi",
-                        "Islamabad",
-                        "Peshawar"
-                    ],
-                    "answer": "Karachi"
-                },
-                {
                     "QID": "5",
                     "question": "2+2?",
                     "options": [
@@ -68,6 +57,17 @@ module.exports = {
                         "24"
                     ],
                     "answer": "23"
+                },
+                {
+                    "QID": 193,
+                    "question": "5x2?",
+                    "options": [
+                        "10",
+                        "20",
+                        "30",
+                        "40"
+                    ],
+                    "answer": "10"
                 }
             ]
         }
