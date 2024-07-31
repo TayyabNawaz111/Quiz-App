@@ -7,28 +7,13 @@ module.exports = {
         },
         {
             "id": 2,
-            "role": "student",
-            "name": "Khan"
+            "role": "admin",
+            "name": "test"
         },
         {
             "id": 3,
-            "role": "student",
-            "name": "Bilal"
-        },
-        {
-            "id": 4,
-            "role": "student",
-            "name": "Nawaz"
-        },
-        {
-            "id": 5,
             "role": "teacher",
-            "name": "Rehman"
-        },
-        {
-            "id": 6,
-            "role": "teacher",
-            "name": "Asim"
+            "name": "a"
         }
     ]
 }

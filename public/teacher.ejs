@@ -5,6 +5,10 @@
     <title>Teacher Dashboard</title>
   </head>
   <body>
+    <a href="http://localhost:3000/">Back</a>
+    <a href="http://localhost:3000/student">Student</a>
+    <a href="http://localhost:3000/teacher">Teacher</a>
+    <a href="http://localhost:3000/admin">Admin</a>
     <h1>Teacher Dashboard</h1>
     <div id="create-quiz">
       <h2>Create a Quiz</h2>
@@ -59,6 +63,7 @@
 
             if (questionText && options.length === 4 && correctAnswer) {
               questions.push({
+                QID: Math.floor(Math. random() * (500 - 100) + 100),
                 question: questionText,
                 options: options,
                 answer: correctAnswer,

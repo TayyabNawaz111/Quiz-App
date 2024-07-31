@@ -1,7 +1,8 @@
 const http = require("http");
 const fs = require("fs");
-let { users } = require("./data/users");  // Use let to allow updating the array
-const { quizzes } = require("./data/quizzes");
+let { users } = require("./data/users");
+let { quizzes } = require("./data/quizzes");
+const { log } = require("console");
 
 const server = http.createServer((req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -12,7 +13,12 @@ const server = http.createServer((req, res) => {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
   if (req.method === "GET") {
-    if (req.url === "/student") {
+    if (req.url === "/") {
+      fs.readFile("./public/index.ejs", (err, data) => {
+        res.writeHead(200, { "Content-Type": "text/html" });
+        res.end(data);
+      });
+    } else if (req.url === "/student") {
       fs.readFile("./public/student.ejs", (err, data) => {
         res.writeHead(200, { "Content-Type": "text/html" });
         res.end(data);
@@ -78,40 +84,78 @@ const server = http.createServer((req, res) => {
         );
       }
     });
-  } else if (req.method === "DELETE" && req.url === "/delete-user") {
+  } else if (req.method === "DELETE") {
     let body = "";
 
     req.on("data", (chunk) => {
       body += chunk.toString();
     });
-
     req.on("end", () => {
-      try {
-        const { id } = JSON.parse(body);
-        const initialLength = users.length;
-        users = users.filter((user) => user.id !== id);
+      if (req.url === "/delete-user") {
+        try {
+          const { id } = JSON.parse(body);
+          const initialLength = users.length;
+          users = users.filter((user) => user.id !== id);
 
-        if (users.length < initialLength) {
-          fs.writeFile(
-            "./data/users.js",
-            `module.exports = ${JSON.stringify({ users }, null, 4)}`,
-            (err) => {
-              if (err) {
-                res.writeHead(500, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({ error: "Failed to update users file" }));
-              } else {
-                res.writeHead(200, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({ success: true }));
+          if (users.length < initialLength) {
+            fs.writeFile(
+              "./data/users.js",
+              `module.exports = ${JSON.stringify({ users }, null, 4)}`,
+              (err) => {
+                if (err) {
+                  res.writeHead(500, { "Content-Type": "application/json" });
+                  res.end(
+                    JSON.stringify({ error: "Failed to update users file" })
+                  );
+                } else {
+                  res.writeHead(200, { "Content-Type": "application/json" });
+                  res.end(JSON.stringify({ success: true }));
+                }
               }
-            }
-          );
-        } else {
-          res.writeHead(404, { "Content-Type": "application/json" });
-          res.end(JSON.stringify({ success: false, message: "User not found" }));
+            );
+          } else {
+            res.writeHead(404, { "Content-Type": "application/json" });
+            res.end(
+              JSON.stringify({ success: false, message: "User not found" })
+            );
+          }
+        } catch (error) {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "Invalid request body" }));
         }
-      } catch (error) {
-        res.writeHead(400, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ error: "Invalid request body" }));
+      } else if (req.url === "/delete-quiz") {
+        try {
+          const { id } = JSON.parse(body);
+          const initialLength = quizzes[0].questions.length;
+          console.log(quizzes[0].questions.length);
+          quizzes[0].questions = quizzes[0].questions.filter((quiz) => quiz.QID !== id);
+
+          if (quizzes.length < initialLength) {
+            fs.writeFile(
+              "./data/quizzes.js",
+              `module.exports = ${JSON.stringify({ quizzes }, null, 4)}`,
+              (err) => {
+                if (err) {
+                  res.writeHead(500, { "Content-Type": "application/json" });
+                  res.end(
+                    JSON.stringify({ error: "Failed to update quizzes file" })
+                  );
+                } else {
+                  res.writeHead(200, { "Content-Type": "application/json" });
+                  res.end(JSON.stringify({ success: true }));
+                }
+              }
+            );
+          } else {
+            res.writeHead(404, { "Content-Type": "application/json" });
+            res.end(
+              JSON.stringify({ success: false, message: "Quiz not found" })
+            );
+          }
+        } catch (error) {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "Invalid request body" }));
+        }
       }
     });
   } else {
