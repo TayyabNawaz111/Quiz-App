@@ -12,7 +12,8 @@ module.exports = {
                         "Islamabad",
                         "Rawalpindi"
                     ],
-                    "answer": "Islamabad"
+                    "answer": "Islamabad",
+                    "state": "true"
                 },
                 {
                     "QID": "2",
@@ -23,7 +24,8 @@ module.exports = {
                         "Quaid-e-Azam",
                         "Zulfiqar Ali Bhutto"
                     ],
-                    "answer": "Quaid-e-Azam"
+                    "answer": "Quaid-e-Azam",
+                    "state": "false"
                 },
                 {
                     "QID": "3",
@@ -34,7 +36,8 @@ module.exports = {
                         "1950",
                         "1955"
                     ],
-                    "answer": "1947"
+                    "answer": "1947",
+                    "state": "false"
                 },
                 {
                     "QID": "5",
@@ -45,7 +48,8 @@ module.exports = {
                         "3",
                         "4"
                     ],
-                    "answer": "4"
+                    "answer": "4",
+                    "state": "true"
                 },
                 {
                     "QID": 116,
@@ -56,7 +60,8 @@ module.exports = {
                         "23",
                         "24"
                     ],
-                    "answer": "23"
+                    "answer": "23",
+                    "state": "true"
                 },
                 {
                     "QID": 193,
@@ -67,7 +72,20 @@ module.exports = {
                         "30",
                         "40"
                     ],
-                    "answer": "10"
+                    "answer": "10",
+                    "state": "true"
+                },
+                {
+                    "QID": 446,
+                    "question": "Identify the antonym of \"Good\".",
+                    "options": [
+                        "better",
+                        "bad",
+                        "beautiful",
+                        "sad"
+                    ],
+                    "answer": "bad",
+                    "state": "false"
                 }
             ]
         }

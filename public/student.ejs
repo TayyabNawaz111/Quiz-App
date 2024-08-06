@@ -1,124 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Student Dashboard</title>
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="container ">
+    <link
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="container">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="http://localhost:3000/">Back</a>
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item"><a class="nav-link" href="http://localhost:3000/student">Student</a></li>
-                <li class="nav-item"><a class="nav-link" href="http://localhost:3000/teacher">Teacher</a></li>
-                <li class="nav-item"><a class="nav-link" href="http://localhost:3000/admin">Admin</a></li>
-            </ul>
-        </div>
+      <a class="navbar-brand" href="http://localhost:3000/">Back</a>
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="http://localhost:3000/student">Student</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="http://localhost:3000/teacher">Teacher</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="http://localhost:3000/admin">Admin</a>
+          </li>
+        </ul>
+      </div>
     </nav>
 
     <h1 class="mt-4">Student Dashboard</h1>
 
     <div id="quiz-selection" class="mt-4">
-        <h2>Available Quizzes</h2>
-        <div id="quiz-list" class="list-group"></div>
+      <h2>Available Quizzes</h2>
+      <div id="quiz-list" class="list-group"></div>
     </div>
 
-    <div id="quiz-container" class="mt-4" style="display:none;">
-        <h2 id="quiz-title"></h2>
-        <div id="questions-container" class="list-group"></div>
-        <button id="submit-quiz" class="btn btn-primary mt-3">Submit Quiz</button>
+    <div id="quiz-container" class="mt-4" style="display: none">
+      <h2 id="quiz-title"></h2>
+      <div id="questions-container" class="list-group"></div>
+      <button id="submit-quiz" class="btn btn-primary mt-3">Submit Quiz</button>
     </div>
 
-    <div id="result-container" class="mt-4" style="display:none;">
-        <h2>Quiz Result</h2>
-        <p id="score" class="lead"></p>
-        <button id="retake-quiz" class="btn btn-secondary">Retake Quiz</button>
+    <div id="result-container" class="mt-4" style="display: none">
+      <h2>Quiz Result</h2>
+      <p id="score" class="lead"></p>
+      <button id="retake-quiz" class="btn btn-secondary">Retake Quiz</button>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const quizList = document.getElementById('quiz-list');
-            const quizContainer = document.getElementById('quiz-container');
-            const questionsContainer = document.getElementById('questions-container');
-            const submitQuizButton = document.getElementById('submit-quiz');
-            const resultContainer = document.getElementById('result-container');
-            const scoreElement = document.getElementById('score');
-            const retakeQuizButton = document.getElementById('retake-quiz');
-            let currentQuiz = null;
+      document.addEventListener("DOMContentLoaded", () => {
+        const quizList = document.getElementById("quiz-list");
+        const quizContainer = document.getElementById("quiz-container");
+        const questionsContainer = document.getElementById(
+          "questions-container"
+        );
+        const submitQuizButton = document.getElementById("submit-quiz");
+        const resultContainer = document.getElementById("result-container");
+        const scoreElement = document.getElementById("score");
+        const retakeQuizButton = document.getElementById("retake-quiz");
+        let currentQuiz = null;
 
-            fetch('http://localhost:3000/quizzes', {mode: 'cors'})
-                .then(response => response.json())
-                .then(quizzes => {
-                    quizzes.forEach(quiz => {
-                        const quizDiv = document.createElement('div');
-                        quizDiv.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+        fetch("http://localhost:3000/quizzes", { mode: "cors" })
+          .then((response) => response.json())
+          .then((quizzes) => {
+            quizzes.forEach((quiz) => {
+              const quizDiv = document.createElement("div");
+              quizDiv.classList.add(
+                "list-group-item",
+                "d-flex",
+                "justify-content-between",
+                "align-items-center"
+              );
 
-                        const startButton = document.createElement('button');
-                        startButton.textContent = 'Start Quiz';
-                        startButton.classList.add('btn', 'btn-success');
-                        startButton.addEventListener('click', () => startQuiz(quiz));
-                        quizDiv.appendChild(document.createTextNode(quiz.title));
-                        quizDiv.appendChild(startButton);
+              const startButton = document.createElement("button");
+              startButton.textContent = "Start Quiz";
+              startButton.classList.add("btn", "btn-success");
+              startButton.addEventListener("click", () => startQuiz(quiz));
+              quizDiv.appendChild(document.createTextNode(quiz.title));
+              quizDiv.appendChild(startButton);
 
-                        quizList.appendChild(quizDiv);
-                    });
-                })
-                .catch(error => console.error('Error fetching quizzes:', error));
-
-            const startQuiz = (quiz) => {
-                currentQuiz = quiz;
-                questionsContainer.innerHTML = '';
-                currentQuiz.questions.forEach((question, index) => {
-                    const questionDiv = document.createElement('div');
-                    questionDiv.classList.add('list-group-item');
-
-                    const questionText = document.createElement('p');
-                    questionText.textContent = `${index + 1}. ${question.question}`;
-                    questionDiv.appendChild(questionText);
-
-                    question.options.forEach(option => {
-                        const optionLabel = document.createElement('label');
-                        optionLabel.classList.add('d-block');
-
-                        const optionInput = document.createElement('input');
-                        optionInput.type = 'radio';
-                        optionInput.name = `question-${index}`;
-                        optionInput.value = option;
-                        optionInput.classList.add('mr-2');
-                        
-                        optionLabel.appendChild(optionInput);
-                        optionLabel.appendChild(document.createTextNode(option));
-                        questionDiv.appendChild(optionLabel);
-                    });
-
-                    questionsContainer.appendChild(questionDiv);
-                });
-
-                quizContainer.style.display = 'block';
-                resultContainer.style.display = 'none';
-            };
-
-            submitQuizButton.addEventListener('click', () => {
-                let score = 0;
-                currentQuiz.questions.forEach((question, index) => {
-                    const selectedOption = document.querySelector(`input[name="question-${index}"]:checked`);
-                    if (selectedOption && selectedOption.value === question.answer) {
-                        score++;
-                    }
-                });
-
-                scoreElement.textContent = `You scored ${score} out of ${currentQuiz.questions.length}`;
-                quizContainer.style.display = 'none';
-                resultContainer.style.display = 'block';
+              quizList.appendChild(quizDiv);
             });
+          })
+          .catch((error) => console.error("Error fetching quizzes:", error));
 
-            retakeQuizButton.addEventListener('click', () => {
-                quizContainer.style.display = 'none';
-                resultContainer.style.display = 'none';
-            });
+        const startQuiz = (quiz) => {
+          currentQuiz = quiz;
+          questionsContainer.innerHTML = "";
+          let count = 1;
+          currentQuiz.questions.forEach((question, index) => {
+            if (question.state === "true") {
+              const questionDiv = document.createElement("div");
+              questionDiv.classList.add("list-group-item");
+
+              const questionText = document.createElement("p");
+              questionText.textContent = `${count++}. ${question.question}`;
+              questionDiv.appendChild(questionText);
+
+              question.options.forEach((option) => {
+                const optionLabel = document.createElement("label");
+                optionLabel.classList.add("d-block");
+
+                const optionInput = document.createElement("input");
+                optionInput.type = "radio";
+                optionInput.name = `question-${index}`;
+                optionInput.value = option;
+                optionInput.classList.add("mr-2");
+
+                optionLabel.appendChild(optionInput);
+                optionLabel.appendChild(document.createTextNode(option));
+                questionDiv.appendChild(optionLabel);
+              });
+
+              questionsContainer.appendChild(questionDiv);
+            }
+          });
+
+          quizContainer.style.display = "block";
+          resultContainer.style.display = "none";
+        };
+
+        submitQuizButton.addEventListener("click", () => {
+          let score = 0;
+          currentQuiz.questions.forEach((question, index) => {
+            const selectedOption = document.querySelector(
+              `input[name="question-${index}"]:checked`
+            );
+            if (selectedOption && selectedOption.value === question.answer) {
+              score++;
+            }
+          });
+
+          scoreElement.textContent = `You scored ${score} out of ${currentQuiz.questions.length}`;
+          quizContainer.style.display = "none";
+          resultContainer.style.display = "block";
         });
+
+        retakeQuizButton.addEventListener("click", () => {
+          quizContainer.style.display = "none";
+          resultContainer.style.display = "none";
+        });
+      });
     </script>
-</body>
+  </body>
 </html>

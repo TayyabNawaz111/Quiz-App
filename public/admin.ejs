@@ -73,7 +73,6 @@
         <!-- Quiz list will be populated here -->
       </div>
     </div>
-
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         const userForm = document.getElementById("user-form");
@@ -95,9 +94,9 @@
                 userDiv.className =
                   "d-flex justify-content-between align-items-center mb-2";
                 userDiv.innerHTML = `
-                            <span>Name: ${user.name}, Role: ${user.role}</span>
-                            <button class="btn btn-danger btn-sm">Delete</button>
-                        `;
+                                  <span>Name: ${user.name}, Role: ${user.role}</span>
+                                  <button class="btn btn-danger btn-sm">Delete</button>
+                              `;
 
                 const deleteButton = userDiv.querySelector("button");
                 deleteButton.addEventListener("click", () =>
@@ -124,13 +123,29 @@
                 quizDiv.className =
                   "d-flex justify-content-between align-items-center mb-2";
                 quizDiv.innerHTML = `
-                            <span>Question: ${quiz.question}</span>
-                            <button class="btn btn-danger btn-sm">Delete</button>
-                        `;
+                                  <span>Question: ${quiz.question}</span>
+                                  <div class="d-flex justify-content-end">
+                                  <button class="btn btn-danger btn-sm delete-btn">Delete</button>
+                                  <button class="btn btn-secondary btn-sm ml-2 disable-btn ${
+                                    quiz.state === "false" ? "d-none" : ""
+                                  }">Disable</button>
+                                  <button class="btn btn-primary btn-sm ml-2 enable-btn ${
+                                    quiz.state === "true" ? "d-none" : ""
+                                  }" style = "padding-left : 10px !important; padding-right:10px !important ">Enable</button>
+                                  </div>
+                              `;
 
-                const deleteButton = quizDiv.querySelector("button");
+                const deleteButton = quizDiv.querySelector(".delete-btn");
                 deleteButton.addEventListener("click", () =>
                   deleteQuiz(quiz.QID)
+                );
+                const disableButton = quizDiv.querySelector(".disable-btn");
+                disableButton.addEventListener("click", () =>
+                  disableQuiz(quiz.QID)
+                );
+                const enableButton = quizDiv.querySelector(".enable-btn");
+                enableButton.addEventListener("click", () =>
+                  enableQuiz(quiz.QID)
                 );
                 quizzesContainer.appendChild(quizDiv);
               });
@@ -193,6 +208,40 @@
               "Content-Type": "application/json",
             },
             body: JSON.stringify({ id: quizId }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              displayQuizzes();
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
+        }
+
+        function disableQuiz(QID) {
+          fetch(`/disableQuiz`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ id: QID }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              displayQuizzes();
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
+        }
+
+        function enableQuiz(QID) {
+          fetch(`/enableQuiz`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ id: QID }),
           })
             .then((response) => response.json())
             .then((data) => {

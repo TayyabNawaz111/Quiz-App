@@ -82,7 +82,47 @@ const server = http.createServer((req, res) => {
             }
           }
         );
-      }
+      } else if (req.url === "/disableQuiz") {
+        const { id } = JSON.parse(body);
+        quizzes[0].questions.forEach((quiz) => {
+            if (quiz.QID === id) {
+                quiz.state = "false";
+            }
+        });
+        fs.writeFile(
+            "./data/quizzes.js",
+            `module.exports = ${JSON.stringify({ quizzes }, null, 4)}`,
+            (err) => {
+                if (err) {
+                    res.writeHead(500, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ error: "Failed to update quizzes file" }));
+                } else {
+                    res.writeHead(200, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ success: true }));
+                }
+            }
+        );
+    } else if (req.url === "/enableQuiz") {
+        const { id } = JSON.parse(body);
+       quizzes[0].questions.forEach((quiz) => {
+            if (quiz.QID === id) {
+                quiz.state = "true";
+            }
+        });
+        fs.writeFile(
+            "./data/quizzes.js",
+            `module.exports = ${JSON.stringify({ quizzes }, null, 4)}`,
+            (err) => {
+                if (err) {
+                    res.writeHead(500, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ error: "Failed to update quizzes file" }));
+                } else {
+                    res.writeHead(200, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ success: true }));
+                }
+            }
+        );
+    }
     });
   } else if (req.method === "DELETE") {
     let body = "";
@@ -128,7 +168,9 @@ const server = http.createServer((req, res) => {
           const { id } = JSON.parse(body);
           const initialLength = quizzes[0].questions.length;
           console.log(quizzes[0].questions.length);
-          quizzes[0].questions = quizzes[0].questions.filter((quiz) => quiz.QID !== id);
+          quizzes[0].questions = quizzes[0].questions.filter(
+            (quiz) => quiz.QID !== id
+          );
 
           if (quizzes.length < initialLength) {
             fs.writeFile(
