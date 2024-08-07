@@ -25,7 +25,7 @@ module.exports = {
                         "Zulfiqar Ali Bhutto"
                     ],
                     "answer": "Quaid-e-Azam",
-                    "state": "false"
+                    "state": "true"
                 },
                 {
                     "QID": "3",
@@ -37,7 +37,7 @@ module.exports = {
                         "1955"
                     ],
                     "answer": "1947",
-                    "state": "false"
+                    "state": "true"
                 },
                 {
                     "QID": "5",
@@ -85,7 +85,7 @@ module.exports = {
                         "sad"
                     ],
                     "answer": "bad",
-                    "state": "false"
+                    "state": "true"
                 }
             ]
         }

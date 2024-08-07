@@ -56,6 +56,35 @@
       </div>
     </div>
 
+    <div class="card mb-4" id="edit-user-form" style="display: none;">
+      <div class="card-header">
+        <h2>Edit User</h2>
+      </div>
+      <div class="card-body">
+        <form  id="editUserForm">
+          <div class="form-group">
+            <input
+              type="text"
+              id="edit-user-name"
+              class="form-control"
+              placeholder="User Name"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <select id="edit-user-role" class="form-control" required>
+              <option value="" disabled selected>Select Role</option>
+              <option value="teacher">Teacher</option>
+              <option value="admin">Admin</option>
+              <option value="student">Student</option>
+            </select>
+          </div>
+          <input type="hidden" id="edit-user-id" />
+          <button type="submit"  class="btn btn-primary">Update User</button>
+        </form>
+      </div>
+    </div>
+
     <div class="card mb-4">
       <div class="card-header">
         <h2>Users List</h2>
@@ -76,6 +105,7 @@
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         const userForm = document.getElementById("user-form");
+        const editUserForm = document.getElementById("edit-user-form");
         const usersContainer = document.getElementById("users-container");
         const quizzesContainer = document.getElementById("quizzes-container");
 
@@ -95,12 +125,19 @@
                   "d-flex justify-content-between align-items-center mb-2";
                 userDiv.innerHTML = `
                                   <span>Name: ${user.name}, Role: ${user.role}</span>
-                                  <button class="btn btn-danger btn-sm">Delete</button>
+                                  <div class="d-flex justify-content-end">
+                                  <button class="btn btn-danger btn-sm" id="delBtn">Delete</button>
+                                  <button class="btn btn-info ml-2 btn-sm" id="editBtn" style = "padding-left : 18px !important; padding-right:18px !important ">Edit</button>
+                                  </div>
                               `;
 
-                const deleteButton = userDiv.querySelector("button");
+                const deleteButton = userDiv.querySelector("#delBtn");
                 deleteButton.addEventListener("click", () =>
                   deleteUser(user.id)
+                );
+                const editButton = userDiv.querySelector("#editBtn");
+                editButton.addEventListener("click", () =>
+                  openEditForm(user)
                 );
                 usersContainer.appendChild(userDiv);
               });
@@ -184,6 +221,38 @@
             });
         });
 
+        editUserForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+
+          const userId = document.getElementById("edit-user-id").value;
+          const userName = document.getElementById("edit-user-name").value;
+          const userRole = document.getElementById("edit-user-role").value;
+
+          const updatedUser = {
+            id: userId,
+            role: userRole,
+            name: userName,
+          };
+          console.log("Sending PUT request to edit user:", updatedUser);
+
+          fetch(`/editUser/${userId}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(updatedUser),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              document.getElementById("editUserForm").reset();
+              editUserForm.style.display = "none";
+              displayUsers();
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
+        });
+
         function deleteUser(userId) {
           fetch(`/delete-user`, {
             method: "DELETE",
@@ -250,6 +319,13 @@
             .catch((error) => {
               console.error("Error:", error);
             });
+        }
+
+        function openEditForm(user) {
+          editUserForm.style.display = "block";
+          document.getElementById("edit-user-id").value = user.id;
+          document.getElementById("edit-user-name").value = user.name;
+          document.getElementById("edit-user-role").value = user.role;
         }
 
         displayUsers();
