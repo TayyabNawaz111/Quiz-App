@@ -18,7 +18,11 @@
     </nav>
 
     <h1 class="mb-4">Teacher Dashboard</h1>
-
+    <h3>Upload Course Material:</h3>
+    <form action="/upload" enctype="multipart/form-data" method="post" class="mb-2">
+        <input type="file" name="courseMaterial" >
+        <input type="submit" class="btn btn-success" value="upload">
+    </form>
     <div id="create-quiz" class="card p-4">
         <h2 class="card-title">Create a Quiz</h2>
         <form id="quiz-form">

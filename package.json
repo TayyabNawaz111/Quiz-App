@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "formidable": "^3.5.1",
+    "mime": "^4.0.4",
     "nodemon": "^3.1.4"
   }
 }

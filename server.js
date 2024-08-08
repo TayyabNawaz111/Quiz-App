@@ -1,6 +1,8 @@
 const http = require("http");
 const fs = require("fs");
 const url = require("url");
+const path = require("path");
+const formidable = require("formidable");
 let { users } = require("./data/users");
 let { quizzes } = require("./data/quizzes");
 
@@ -41,110 +43,140 @@ const server = http.createServer((req, res) => {
       res.end(JSON.stringify(quizzes));
     }
   } else if (req.method === "POST") {
-    let body = "";
+    if (req.url === "/upload") {
+      const form = new formidable.IncomingForm();
 
-    req.on("data", (chunk) => {
-      body += chunk.toString();
-    });
-
-    req.on("end", () => {
-      if (req.url === "/add-quiz") {
-        const newQuiz = JSON.parse(body);
-        quizzes[0].questions.push(newQuiz.questions[0]);
-
-        fs.writeFile(
-          "./data/quizzes.js",
-          `module.exports = ${JSON.stringify({ quizzes }, null, 4)}`,
-          (err) => {
-            if (err) {
-              res.writeHead(500, { "Content-Type": "application/json" });
-              res.end(JSON.stringify({ error: "Failed to save quiz" }));
-            } else {
-              res.writeHead(200, { "Content-Type": "application/json" });
-              res.end(JSON.stringify(newQuiz));
-            }
-          }
-        );
-      } else if (req.url === "/add-user") {
-        const newUser = JSON.parse(body);
-        users.push(newUser);
-        fs.writeFile(
-          "./data/users.js",
-          `module.exports = ${JSON.stringify({ users }, null, 4)}`,
-          (err) => {
-            if (err) {
-              res.writeHead(500, { "Content-Type": "application/json" });
-              res.end(JSON.stringify({ error: "Failed to save user" }));
-            } else {
-              res.writeHead(200, { "Content-Type": "application/json" });
-              res.end(JSON.stringify(newUser));
-            }
-          }
-        );
-      } else if (req.url === "/disableQuiz") {
-        const { id } = JSON.parse(body);
-        quizzes[0].questions.forEach((quiz) => {
-          if (quiz.QID === id) {
-            quiz.state = "false";
-          }
-        });
-        fs.writeFile(
-          "./data/quizzes.js",
-          `module.exports = ${JSON.stringify({ quizzes }, null, 4)}`,
-          (err) => {
-            if (err) {
-              res.writeHead(500, { "Content-Type": "application/json" });
-              res.end(
-                JSON.stringify({ error: "Failed to update quizzes file" })
-              );
-            } else {
-              res.writeHead(200, { "Content-Type": "application/json" });
-              res.end(JSON.stringify({ success: true }));
-            }
-          }
-        );
-      } else if (req.url === "/enableQuiz") {
-        const { id } = JSON.parse(body);
-        quizzes[0].questions.forEach((quiz) => {
-          if (quiz.QID === id) {
-            quiz.state = "true";
-          }
-        });
-        fs.writeFile(
-          "./data/quizzes.js",
-          `module.exports = ${JSON.stringify({ quizzes }, null, 4)}`,
-          (err) => {
-            if (err) {
-              res.writeHead(500, { "Content-Type": "application/json" });
-              res.end(
-                JSON.stringify({ error: "Failed to update quizzes file" })
-              );
-            } else {
-              res.writeHead(200, { "Content-Type": "application/json" });
-              res.end(JSON.stringify({ success: true }));
-            }
-          }
-        );
-      } else if (req.url === "/setLimit") {
-        const { updatedLimit } = JSON.parse(body);
-        quizzes[0].timeLimit = updatedLimit;
-        fs.writeFile(
-          "./data/quizzes.js",
-          `module.exports = ${JSON.stringify({ quizzes }, null, 4)}`,
-          (err) => {
-            if (err) {
-              res.writeHead(500, { "Content-Type": "application/json" });
-              res.end(
-                JSON.stringify({ error: "Failed to update quizzes file" })
-              );
-            } else {
-              res.writeHead(200, { "Content-Type": "application/json" });
-              res.end(JSON.stringify({ success: true }));
-            }
-          }
-        );
+      // Optional: Set the upload directory
+      const uploadDir = path.join(__dirname, "Course Material");
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
       }
-    });
+
+      // Set the upload directory
+      form.uploadDir = uploadDir;
+
+      // Handle fileBegin event to set the file path
+      form.on("fileBegin", (name, file) => {
+        file.filepath = path.join(form.uploadDir, file.originalFilename);
+      });
+
+      // Handle form parsing
+      form.parse(req, (err, fields, files) => {
+        if (err) {
+          console.error("File upload error:", err); // Log the error for debugging
+          res.writeHead(500, { "Content-Type": "text/plain" });
+          res.end("Error occurred during file upload: " + err.message); // Send the error message to the client
+          return;
+        }
+        res.writeHead(302, { Location: "/teacher" }); // 302 is the status code for redirection
+        res.end();
+      });
+    } else {
+      let body = "";
+
+      req.on("data", (chunk) => {
+        body += chunk.toString();
+      });
+
+      req.on("end", () => {
+        if (req.url === "/add-quiz") {
+          const newQuiz = JSON.parse(body);
+          quizzes[0].questions.push(newQuiz.questions[0]);
+
+          fs.writeFile(
+            "./data/quizzes.js",
+            `module.exports = ${JSON.stringify({ quizzes }, null, 4)}`,
+            (err) => {
+              if (err) {
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Failed to save quiz" }));
+              } else {
+                res.writeHead(200, { "Content-Type": "application/json" });
+                res.end(JSON.stringify(newQuiz));
+              }
+            }
+          );
+        } else if (req.url === "/add-user") {
+          const newUser = JSON.parse(body);
+          users.push(newUser);
+          fs.writeFile(
+            "./data/users.js",
+            `module.exports = ${JSON.stringify({ users }, null, 4)}`,
+            (err) => {
+              if (err) {
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Failed to save user" }));
+              } else {
+                res.writeHead(200, { "Content-Type": "application/json" });
+                res.end(JSON.stringify(newUser));
+              }
+            }
+          );
+        } else if (req.url === "/disableQuiz") {
+          const { id } = JSON.parse(body);
+          quizzes[0].questions.forEach((quiz) => {
+            if (quiz.QID === id) {
+              quiz.state = "false";
+            }
+          });
+          fs.writeFile(
+            "./data/quizzes.js",
+            `module.exports = ${JSON.stringify({ quizzes }, null, 4)}`,
+            (err) => {
+              if (err) {
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(
+                  JSON.stringify({ error: "Failed to update quizzes file" })
+                );
+              } else {
+                res.writeHead(200, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ success: true }));
+              }
+            }
+          );
+        } else if (req.url === "/enableQuiz") {
+          const { id } = JSON.parse(body);
+          quizzes[0].questions.forEach((quiz) => {
+            if (quiz.QID === id) {
+              quiz.state = "true";
+            }
+          });
+          fs.writeFile(
+            "./data/quizzes.js",
+            `module.exports = ${JSON.stringify({ quizzes }, null, 4)}`,
+            (err) => {
+              if (err) {
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(
+                  JSON.stringify({ error: "Failed to update quizzes file" })
+                );
+              } else {
+                res.writeHead(200, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ success: true }));
+              }
+            }
+          );
+        } else if (req.url === "/setLimit") {
+          const { updatedLimit } = JSON.parse(body);
+          quizzes[0].timeLimit = updatedLimit;
+          fs.writeFile(
+            "./data/quizzes.js",
+            `module.exports = ${JSON.stringify({ quizzes }, null, 4)}`,
+            (err) => {
+              if (err) {
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(
+                  JSON.stringify({ error: "Failed to update quizzes file" })
+                );
+              } else {
+                res.writeHead(200, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ success: true }));
+              }
+            }
+          );
+        }
+      });
+    }
   } else if (req.method === "PUT") {
     let body = "";
 

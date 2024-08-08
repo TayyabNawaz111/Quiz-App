@@ -27,8 +27,9 @@
       </div>
     </nav>
 
-    <h1 class="mt-4">Student Dashboard</h1>
-
+    <h1 class="my-4">Student Dashboard</h1>
+    <h3>Course Material:</h3>
+    <div>No files uploaded yet.</div>
     <div id="quiz-selection" class="mt-4">
       <h2>Available Quizzes</h2>
       <div id="quiz-list" class="list-group"></div>
@@ -84,7 +85,7 @@
             });
           })
           .catch((error) => console.error("Error fetching quizzes:", error));
-          let countdownInterval;
+        let countdownInterval;
         const startQuiz = (quiz) => {
           currentQuiz = quiz;
           questionsContainer.innerHTML = "";
@@ -125,7 +126,7 @@
           let countdownValue = quiz.timeLimit; // start from 10 seconds
           countdown.textContent = `${countdownValue}s`;
 
-           countdownInterval = setInterval(() => {
+          countdownInterval = setInterval(() => {
             countdownValue--;
             countdown.textContent = `${countdownValue}s`;
 
@@ -139,7 +140,7 @@
         };
 
         submitQuizButton.addEventListener("click", () => {
-            clearInterval(countdownInterval);
+          clearInterval(countdownInterval);
           let score = 0;
           currentQuiz.questions.forEach((question, index) => {
             const selectedOption = document.querySelector(
