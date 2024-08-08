@@ -56,12 +56,12 @@
       </div>
     </div>
 
-    <div class="card mb-4" id="edit-user-form" style="display: none;">
+    <div class="card mb-4" id="edit-user-form" style="display: none">
       <div class="card-header">
         <h2>Edit User</h2>
       </div>
       <div class="card-body">
-        <form  id="editUserForm">
+        <form id="editUserForm">
           <div class="form-group">
             <input
               type="text"
@@ -80,7 +80,7 @@
             </select>
           </div>
           <input type="hidden" id="edit-user-id" />
-          <button type="submit"  class="btn btn-primary">Update User</button>
+          <button type="submit" class="btn btn-primary">Update User</button>
         </form>
       </div>
     </div>
@@ -97,6 +97,15 @@
     <div class="card mb-4">
       <div class="card-header">
         <h2>Quizzes List</h2>
+      </div>
+      <div class="d-flex">
+        <h5 class="mx-4 mt-4">Time limit for the quiz (in seconds):</h5>
+        <input
+          type="number"
+          class="mt-4"
+          id="limit"
+          style="height: 30px"
+        /><button class="btn btn-success btn-sm mt-4 ml-2" id="setBtn" style = "padding-left : 10px !important; padding-right:10px !important ">set</button>
       </div>
       <div class="card-body" id="quizzes-container">
         <!-- Quiz list will be populated here -->
@@ -136,9 +145,7 @@
                   deleteUser(user.id)
                 );
                 const editButton = userDiv.querySelector("#editBtn");
-                editButton.addEventListener("click", () =>
-                  openEditForm(user)
-                );
+                editButton.addEventListener("click", () => openEditForm(user));
                 usersContainer.appendChild(userDiv);
               });
             })
@@ -326,6 +333,28 @@
           document.getElementById("edit-user-id").value = user.id;
           document.getElementById("edit-user-name").value = user.name;
           document.getElementById("edit-user-role").value = user.role;
+        }
+
+        document.getElementById("setBtn").addEventListener("click",setTimeLimit);
+
+        function setTimeLimit() {
+          let limit = document.getElementById("limit");
+          const limitValue = parseInt(limit.value);
+          fetch(`/setLimit`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ updatedLimit: limitValue }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              alert("Succesfully set limit");
+              limit.value = "";
+            })
+            .catch((error) => {
+              console.log("Error: ", error);
+            });
         }
 
         displayUsers();

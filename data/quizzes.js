@@ -87,7 +87,8 @@ module.exports = {
                     "answer": "bad",
                     "state": "true"
                 }
-            ]
+            ],
+            "timeLimit": 30
         }
     ]
 }
