@@ -5,6 +5,7 @@ const path = require("path");
 const formidable = require("formidable");
 let { users } = require("./data/users");
 let { quizzes } = require("./data/quizzes");
+let { fileNames } = require("./data/fileNames");
 
 const server = http.createServer((req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -41,6 +42,28 @@ const server = http.createServer((req, res) => {
     } else if (req.url === "/quizzes") {
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify(quizzes));
+    } else if (req.url === "/fileNames") {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(fileNames));
+    } else if (req.url.startsWith("/download")) {
+      // Handle file download
+      const query = url.parse(req.url, true).query;
+      const fileName = query.file;
+      const filePath = path.join(__dirname, "Course Material", fileName);
+
+      fs.readFile(filePath, (err, data) => {
+        if (err) {
+          res.writeHead(500, { "Content-Type": "text/plain" });
+          res.end("Error reading file");
+          return;
+        }
+
+        res.writeHead(200, {
+          "Content-Type": "application/octet-stream",
+          "Content-Disposition": `attachment; filename=${fileName}`,
+        });
+        res.end(data);
+      });
     }
   } else if (req.method === "POST") {
     if (req.url === "/upload") {
@@ -68,8 +91,30 @@ const server = http.createServer((req, res) => {
           res.end("Error occurred during file upload: " + err.message); // Send the error message to the client
           return;
         }
-        res.writeHead(302, { Location: "/teacher" }); // 302 is the status code for redirection
-        res.end();
+        // console.log(files.courseMaterial[0].originalFilename);
+        //add name to file
+        Object.values(files).forEach((file, index) => {
+          const uploadedFileName = file[index].originalFilename;
+          if (uploadedFileName) {
+            fileNames.push(uploadedFileName);
+            console.log("Uploaded file name:", uploadedFileName); // Log the uploaded filename
+          } else {
+            console.error("Original filename is missing or null");
+          }
+        });
+        fs.writeFile(
+          "./data/fileNames.js",
+          `module.exports = ${JSON.stringify({ fileNames }, null, 4)}`,
+          (err) => {
+            if (err) {
+              res.writeHead(500, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ error: "Failed to save file name" }));
+            } else {
+              res.writeHead(302, { Location: "/teacher" }); // 302 is the status code for redirection
+              res.end();
+            }
+          }
+        );
       });
     } else {
       let body = "";
