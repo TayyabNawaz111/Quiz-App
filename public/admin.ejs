@@ -11,17 +11,11 @@
   </head>
   <body class="container">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      <a class="navbar-brand" href="http://localhost:3000/">Back</a>
+      <a class="navbar-brand" href="http://localhost:3000/admin">Admin</a>
       <div class="collapse navbar-collapse">
-        <ul class="navbar-nav mr-auto">
+        <ul class="navbar-nav ml-auto">
           <li class="nav-item">
-            <a class="nav-link" href="http://localhost:3000/student">Student</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="http://localhost:3000/teacher">Teacher</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="http://localhost:3000/admin">Admin</a>
+            <a class="nav-link btn btn-danger text-white" href="http://localhost:3000/">Logout</a>
           </li>
         </ul>
       </div>
@@ -40,6 +34,24 @@
               id="user-name"
               class="form-control"
               placeholder="User Name"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <input
+              type="email"
+              id="user-email"
+              class="form-control"
+              placeholder="Email"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <input
+              type="password"
+              id="user-password"
+              class="form-control"
+              placeholder="Password"
               required
             />
           </div>
@@ -68,6 +80,24 @@
               id="edit-user-name"
               class="form-control"
               placeholder="User Name"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <input
+              type="email"
+              id="edit-user-email"
+              class="form-control"
+              placeholder="Email"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <input
+              type="password"
+              id="edit-user-password"
+              class="form-control"
+              placeholder="Password"
               required
             />
           </div>
@@ -105,7 +135,13 @@
           class="mt-4"
           id="limit"
           style="height: 30px"
-        /><button class="btn btn-success btn-sm mt-4 ml-2" id="setBtn" style = "padding-left : 10px !important; padding-right:10px !important ">set</button>
+        /><button
+          class="btn btn-success btn-sm mt-4 ml-2"
+          id="setBtn"
+          style="padding-left: 10px !important; padding-right: 10px !important"
+        >
+          set
+        </button>
       </div>
       <div class="card-body" id="quizzes-container">
         <!-- Quiz list will be populated here -->
@@ -132,13 +168,13 @@
                 const userDiv = document.createElement("div");
                 userDiv.className =
                   "d-flex justify-content-between align-items-center mb-2";
-                userDiv.innerHTML = `
-                                  <span>Name: ${user.name}, Role: ${user.role}</span>
+                userDiv.innerHTML =`
+                                  <span>Name: ${user.name}, Email:${user.email}, Role: ${user.role}</span>
                                   <div class="d-flex justify-content-end">
                                   <button class="btn btn-danger btn-sm" id="delBtn">Delete</button>
                                   <button class="btn btn-info ml-2 btn-sm" id="editBtn" style = "padding-left : 18px !important; padding-right:18px !important ">Edit</button>
-                                  </div>
-                              `;
+                                  </div>`
+                              ;
 
                 const deleteButton = userDiv.querySelector("#delBtn");
                 deleteButton.addEventListener("click", () =>
@@ -166,8 +202,8 @@
                 const quizDiv = document.createElement("div");
                 quizDiv.className =
                   "d-flex justify-content-between align-items-center mb-2";
-                quizDiv.innerHTML = `
-                                  <span>Question: ${quiz.question}</span>
+                quizDiv.innerHTML =
+                                  `<span>Question: ${quiz.question}</span>
                                   <div class="d-flex justify-content-end">
                                   <button class="btn btn-danger btn-sm delete-btn">Delete</button>
                                   <button class="btn btn-secondary btn-sm ml-2 disable-btn ${
@@ -176,8 +212,8 @@
                                   <button class="btn btn-primary btn-sm ml-2 enable-btn ${
                                     quiz.state === "true" ? "d-none" : ""
                                   }" style = "padding-left : 10px !important; padding-right:10px !important ">Enable</button>
-                                  </div>
-                              `;
+                                  </div>`
+                              ;
 
                 const deleteButton = quizDiv.querySelector(".delete-btn");
                 deleteButton.addEventListener("click", () =>
@@ -203,12 +239,16 @@
           e.preventDefault();
 
           const userName = document.getElementById("user-name").value;
+          const userEmail = document.getElementById("user-email").value;
+          const userPassword = document.getElementById("user-password").value;
           const userRole = document.getElementById("user-role").value;
 
           const newUser = {
             id: totalUsers + 1,
             role: userRole,
             name: userName,
+            email: userEmail,
+            pass: userPassword,
           };
 
           fetch("/add-user", {
@@ -233,12 +273,16 @@
 
           const userId = document.getElementById("edit-user-id").value;
           const userName = document.getElementById("edit-user-name").value;
+          const userEmail = document.getElementById("edit-user-email").value;
+          const userPassword = document.getElementById("edit-user-password").value;
           const userRole = document.getElementById("edit-user-role").value;
 
           const updatedUser = {
             id: userId,
             role: userRole,
             name: userName,
+            email: userEmail,
+            pass: userPassword,
           };
           console.log("Sending PUT request to edit user:", updatedUser);
 
@@ -332,10 +376,12 @@
           editUserForm.style.display = "block";
           document.getElementById("edit-user-id").value = user.id;
           document.getElementById("edit-user-name").value = user.name;
+          document.getElementById("edit-user-email").value = user.email;
+          document.getElementById("edit-user-password").value = user.pass;
           document.getElementById("edit-user-role").value = user.role;
         }
 
-        document.getElementById("setBtn").addEventListener("click",setTimeLimit);
+        document.getElementById("setBtn").addEventListener("click", setTimeLimit);
 
         function setTimeLimit() {
           let limit = document.getElementById("limit");

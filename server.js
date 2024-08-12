@@ -6,7 +6,6 @@ const formidable = require("formidable");
 let { users } = require("./data/users");
 let { quizzes } = require("./data/quizzes");
 let { fileNames } = require("./data/fileNames");
-
 const server = http.createServer((req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
@@ -17,7 +16,7 @@ const server = http.createServer((req, res) => {
 
   if (req.method === "GET") {
     if (req.url === "/") {
-      fs.readFile("./public/index.ejs", (err, data) => {
+      fs.readFile("./public/login.ejs", (err, data) => {
         res.writeHead(200, { "Content-Type": "text/html" });
         res.end(data);
       });
@@ -141,6 +140,20 @@ const server = http.createServer((req, res) => {
               }
             }
           );
+        } else if (req.url === "/login") {
+          const { email, password } = JSON.parse(body);
+          console.log("Received email:", email);
+          const user = users.find((u) => u.email === email);
+
+          if (user && user.pass === password) {
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ success: true  , role : user.role}));
+          } else {
+            res.writeHead(401, { "Content-Type": "application/json" });
+            res.end(
+              JSON.stringify({ success: false, message: "Invalid credentials" })
+            );
+          }
         } else if (req.url === "/add-user") {
           const newUser = JSON.parse(body);
           users.push(newUser);

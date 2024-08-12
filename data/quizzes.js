@@ -88,7 +88,7 @@ module.exports = {
                     "state": "true"
                 }
             ],
-            "timeLimit": 10
+            "timeLimit": 20
         }
     ]
 }
