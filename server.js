@@ -20,7 +20,13 @@ const server = http.createServer((req, res) => {
         res.writeHead(200, { "Content-Type": "text/html" });
         res.end(data);
       });
-    } else if (req.url === "/student") {
+    }else if(req.url==="/leaderboard"){
+      fs.readFile("./public/leaderboard.ejs", (err, data) => {
+        res.writeHead(200, { "Content-Type": "text/html" });
+        res.end(data);
+      });
+    }
+     else if (req.url === "/student") {
       fs.readFile("./public/student.ejs", (err, data) => {
         res.writeHead(200, { "Content-Type": "text/html" });
         res.end(data);

@@ -28,7 +28,7 @@ module.exports = {
             "name": "Nawaz Ahmad",
             "email": "nawaz@gmail.com",
             "pass": "nawaz",
-            "points": 7
+            "points": 14
         }
     ]
 }

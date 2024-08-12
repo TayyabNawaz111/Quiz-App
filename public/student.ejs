@@ -13,11 +13,18 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <a class="navbar-brand" href="http://localhost:3000/student">Student</a>
       <div class="collapse navbar-collapse">
-        <ul class="navbar-nav ml-auto">
+        <ul class="navbar-nav">
           <li class="nav-item">
             <a
-              class="nav-link btn btn-danger text-white"
-              id="logoutBtn"
+              class="nav-link navbar-brand"
+              href="http://localhost:3000/leaderboard"
+              >Leaderboard</a
+            >
+          </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link btn btn-danger text-white" id="logoutBtn"
               >Logout</a
             >
           </li>
@@ -68,10 +75,10 @@
         let name = document.getElementById("nameDiv");
         let points = document.getElementById("pointsDiv");
         const logout = document.getElementById("logoutBtn");
-        logout.addEventListener("click",()=>{
-            sessionStorage.clear();
-            window.location.href = "http://localhost:3000/";
-        })
+        logout.addEventListener("click", () => {
+          sessionStorage.clear();
+          window.location.href = "http://localhost:3000/";
+        });
 
         //Fetch users from server
         function displayshowUserInfo() {

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Leaderboard</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome CSS -->
+
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        padding: 20px;
+      }
+      .leaderboard-table {
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center">
+        <button
+          class="btn btn-info d-flex align-items-center"
+          onclick="window.history.back()"
+          style="border-radius: 50px; padding: 10px 20px"
+        >
+          <i class="fas fa-arrow-left mr-2"></i> Back
+        </button>
+
+        <h1 class="text-center flex-grow-1">Leaderboard</h1>
+      </div>
+      <table class="table table-striped leaderboard-table">
+        <thead>
+          <tr>
+            <th scope="col">Rank</th>
+            <th scope="col">Name</th>
+            <th scope="col">Score</th>
+          </tr>
+        </thead>
+        <tbody id="LTB"></tbody>
+      </table>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        fetch("http://localhost:3000/users", { mode: "cors" })
+          .then((response) => response.json())
+          .then((data) => {
+            let students = data.filter((user) => user.role === "student");
+            students.sort((a, b) => b.points - a.points); // Sort by points in descending order
+
+            // Get the table body element
+            const tableBody = document.getElementById("LTB");
+
+            // Clear existing rows
+            tableBody.innerHTML = "";
+
+            // Populate the table with sorted data
+            students.forEach((student, index) => {
+              const row = document.createElement("tr");
+              row.innerHTML = `
+                <th scope="row">${index + 1}</th>
+                <td>${student.name}</td>
+                <td>${student.points}</td>
+              `;
+              tableBody.appendChild(row);
+            });
+          })
+          .catch((err) => {
+            console.error("Error fetching leaderboard data:", err);
+          });
+      });
+    </script>
+  </body>
+</html>
