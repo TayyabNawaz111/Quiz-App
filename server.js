@@ -140,6 +140,27 @@ const server = http.createServer((req, res) => {
               }
             }
           );
+        } else if (req.url === "/updatePoints") {
+          const { earnedPoints, id } = JSON.parse(body);
+          const currentUser = users.find((user) => user.id == id);
+          // console.log(currentUser,currentUser.points);
+          currentUser.points += earnedPoints;
+          fs.writeFile(
+            "./data/users.js",
+            `module.exports = ${JSON.stringify({ users }, null, 4)}`,
+            (err) => {
+              if (err) {
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Failed to update user" }));
+              } else {
+                res.writeHead(200, { "Content-Type": "application/json" });
+                res.end(JSON.stringify(currentUser));
+              }
+            }
+          );
+
+
+          //----------------------------------------
         } else if (req.url === "/login") {
           const { email, password } = JSON.parse(body);
           console.log("Received email:", email);
@@ -147,7 +168,9 @@ const server = http.createServer((req, res) => {
 
           if (user && user.pass === password) {
             res.writeHead(200, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ success: true  , role : user.role}));
+            res.end(
+              JSON.stringify({ success: true, role: user.role, id: user.id })
+            );
           } else {
             res.writeHead(401, { "Content-Type": "application/json" });
             res.end(

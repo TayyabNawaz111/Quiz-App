@@ -51,6 +51,8 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
+                        // console.log(data.id);
+                        sessionStorage.setItem("id",data.id);
                         window.location.href = `http://localhost:3000/${data.role}`; // Redirect to dashboard or home page
                     } else {
                         alert("Invalid credentials");

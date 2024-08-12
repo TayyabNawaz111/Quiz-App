@@ -15,7 +15,11 @@
       <div class="collapse navbar-collapse">
         <ul class="navbar-nav ml-auto">
           <li class="nav-item">
-            <a class="nav-link btn btn-danger text-white" href="http://localhost:3000/">Logout</a>
+            <a
+              class="nav-link btn btn-danger text-white"
+              href="http://localhost:3000/"
+              >Logout</a
+            >
           </li>
         </ul>
       </div>
@@ -156,6 +160,19 @@
 
         let totalUsers = 0;
 
+        function updateTotalUsers() {
+          fetch("http://localhost:3000/users", {
+            method: "GET",
+          })
+            .then((response) => response.json())
+            .then((users) => {
+              totalUsers = users.length;
+            })
+            .catch((error) => {
+              console.error("Error fetching users:", error);
+            });
+        }
+
         function displayUsers() {
           fetch("http://localhost:3000/users", {
             method: "GET",
@@ -164,17 +181,16 @@
             .then((users) => {
               usersContainer.innerHTML = "";
               users.forEach((user) => {
-                totalUsers++;
                 const userDiv = document.createElement("div");
                 userDiv.className =
                   "d-flex justify-content-between align-items-center mb-2";
-                userDiv.innerHTML =`
-                                  <span>Name: ${user.name}, Email:${user.email}, Role: ${user.role}</span>
-                                  <div class="d-flex justify-content-end">
-                                  <button class="btn btn-danger btn-sm" id="delBtn">Delete</button>
-                                  <button class="btn btn-info ml-2 btn-sm" id="editBtn" style = "padding-left : 18px !important; padding-right:18px !important ">Edit</button>
-                                  </div>`
-                              ;
+                userDiv.innerHTML = `
+                  <span>Name: ${user.name}, Email:${user.email}, Role: ${user.role}</span>
+                  <div class="d-flex justify-content-end">
+                    <button class="btn btn-danger btn-sm" id="delBtn">Delete</button>
+                    <button class="btn btn-info ml-2 btn-sm" id="editBtn" style="padding-left: 18px !important; padding-right: 18px !important">Edit</button>
+                  </div>
+                `;
 
                 const deleteButton = userDiv.querySelector("#delBtn");
                 deleteButton.addEventListener("click", () =>
@@ -202,18 +218,18 @@
                 const quizDiv = document.createElement("div");
                 quizDiv.className =
                   "d-flex justify-content-between align-items-center mb-2";
-                quizDiv.innerHTML =
-                                  `<span>Question: ${quiz.question}</span>
-                                  <div class="d-flex justify-content-end">
-                                  <button class="btn btn-danger btn-sm delete-btn">Delete</button>
-                                  <button class="btn btn-secondary btn-sm ml-2 disable-btn ${
-                                    quiz.state === "false" ? "d-none" : ""
-                                  }">Disable</button>
-                                  <button class="btn btn-primary btn-sm ml-2 enable-btn ${
-                                    quiz.state === "true" ? "d-none" : ""
-                                  }" style = "padding-left : 10px !important; padding-right:10px !important ">Enable</button>
-                                  </div>`
-                              ;
+                quizDiv.innerHTML = `
+                  <span>Question: ${quiz.question}</span>
+                  <div class="d-flex justify-content-end">
+                    <button class="btn btn-danger btn-sm delete-btn">Delete</button>
+                    <button class="btn btn-secondary btn-sm ml-2 disable-btn ${
+                      quiz.state === "false" ? "d-none" : ""
+                    }">Disable</button>
+                    <button class="btn btn-primary btn-sm ml-2 enable-btn ${
+                      quiz.state === "true" ? "d-none" : ""
+                    }" style="padding-left: 10px !important; padding-right: 10px !important">Enable</button>
+                  </div>
+                `;
 
                 const deleteButton = quizDiv.querySelector(".delete-btn");
                 deleteButton.addEventListener("click", () =>
@@ -243,13 +259,25 @@
           const userPassword = document.getElementById("user-password").value;
           const userRole = document.getElementById("user-role").value;
 
-          const newUser = {
-            id: totalUsers + 1,
-            role: userRole,
-            name: userName,
-            email: userEmail,
-            pass: userPassword,
-          };
+          let newUser;
+          if (userRole === "student") {
+            newUser = {
+              id: totalUsers + 1,
+              role: userRole,
+              name: userName,
+              email: userEmail,
+              pass: userPassword,
+              points: 0,
+            };
+          } else {
+            newUser = {
+              id: totalUsers + 1,
+              role: userRole,
+              name: userName,
+              email: userEmail,
+              pass: userPassword,
+            };
+          }
 
           fetch("/add-user", {
             method: "POST",
@@ -262,6 +290,7 @@
             .then((data) => {
               userForm.reset();
               displayUsers();
+              updateTotalUsers();
             })
             .catch((error) => {
               console.error("Error:", error);
@@ -274,7 +303,8 @@
           const userId = document.getElementById("edit-user-id").value;
           const userName = document.getElementById("edit-user-name").value;
           const userEmail = document.getElementById("edit-user-email").value;
-          const userPassword = document.getElementById("edit-user-password").value;
+          const userPassword =
+            document.getElementById("edit-user-password").value;
           const userRole = document.getElementById("edit-user-role").value;
 
           const updatedUser = {
@@ -284,7 +314,6 @@
             email: userEmail,
             pass: userPassword,
           };
-          console.log("Sending PUT request to edit user:", updatedUser);
 
           fetch(`/editUser/${userId}`, {
             method: "PUT",
@@ -305,7 +334,7 @@
         });
 
         function deleteUser(userId) {
-          fetch(`/delete-user`, {
+          fetch("/delete-user", {
             method: "DELETE",
             headers: {
               "Content-Type": "application/json",
@@ -322,7 +351,7 @@
         }
 
         function deleteQuiz(quizId) {
-          fetch(`/delete-quiz`, {
+          fetch("/delete-quiz", {
             method: "DELETE",
             headers: {
               "Content-Type": "application/json",
@@ -339,7 +368,7 @@
         }
 
         function disableQuiz(QID) {
-          fetch(`/disableQuiz`, {
+          fetch("/disableQuiz", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -356,7 +385,7 @@
         }
 
         function enableQuiz(QID) {
-          fetch(`/enableQuiz`, {
+          fetch("/enableQuiz", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -381,12 +410,14 @@
           document.getElementById("edit-user-role").value = user.role;
         }
 
-        document.getElementById("setBtn").addEventListener("click", setTimeLimit);
+        document
+          .getElementById("setBtn")
+          .addEventListener("click", setTimeLimit);
 
         function setTimeLimit() {
           let limit = document.getElementById("limit");
           const limitValue = parseInt(limit.value);
-          fetch(`/setLimit`, {
+          fetch("/setLimit", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -395,7 +426,7 @@
           })
             .then((response) => response.json())
             .then((data) => {
-              alert("Succesfully set limit");
+              alert("Successfully set limit");
               limit.value = "";
             })
             .catch((error) => {
@@ -405,6 +436,7 @@
 
         displayUsers();
         displayQuizzes();
+        updateTotalUsers();
       });
     </script>
   </body>

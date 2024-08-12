@@ -15,13 +15,21 @@
       <div class="collapse navbar-collapse">
         <ul class="navbar-nav ml-auto">
           <li class="nav-item">
-            <a class="nav-link btn btn-danger text-white" href="http://localhost:3000/">Logout</a>
+            <a
+              class="nav-link btn btn-danger text-white"
+              id="logoutBtn"
+              >Logout</a
+            >
           </li>
         </ul>
       </div>
     </nav>
 
     <h1 class="my-4">Student Dashboard</h1>
+    <div class="mb-4">
+      <strong id="nameDiv" class="mr-4">name</strong>
+      <strong id="pointsDiv">points</strong>
+    </div>
     <h3>Course Material:</h3>
     <div class="courseMaterial">No files uploaded yet.</div>
     <div id="quiz-selection" class="mt-4">
@@ -57,6 +65,31 @@
         const retakeQuizButton = document.getElementById("retake-quiz");
         let currentQuiz = null;
         const courseMaterialDiv = document.querySelector(".courseMaterial");
+        let name = document.getElementById("nameDiv");
+        let points = document.getElementById("pointsDiv");
+        const logout = document.getElementById("logoutBtn");
+        logout.addEventListener("click",()=>{
+            sessionStorage.clear();
+            window.location.href = "http://localhost:3000/";
+        })
+
+        //Fetch users from server
+        function displayshowUserInfo() {
+          fetch("http://localhost:3000/users", { mode: "cors" })
+            .then((response) => response.json())
+            .then((data) => {
+              // console.log(data);
+              const currentUser = data.find(
+                (user) => user.id == sessionStorage.getItem("id")
+              );
+              name.innerHTML = `Name: ${currentUser.name}`;
+              points.innerHTML = `Points: ${currentUser.points}`;
+            })
+            .catch((err) => {
+              console.log("Err: ", err);
+            });
+        }
+        displayshowUserInfo();
 
         // Fetch the file names from the server
         fetch("http://localhost:3000/fileNames", { mode: "cors" })
@@ -64,7 +97,7 @@
           .then((fileNames) => {
             if (fileNames.length > 0) {
               courseMaterialDiv.innerHTML = "";
-              fileNames.forEach((fileName,index) => {
+              fileNames.forEach((fileName, index) => {
                 const fileDiv = document.createElement("div");
                 fileDiv.classList.add("d-flex", "align-items-center", "mb-2");
 
@@ -74,8 +107,15 @@
 
                 const downloadButton = document.createElement("a");
                 downloadButton.textContent = "Download";
-                downloadButton.href = `http://localhost:3000/download?file=${encodeURIComponent(fileName)}`;
-                downloadButton.classList.add("btn", "btn-primary", "btn-sm" , "ml-auto");
+                downloadButton.href = `http://localhost:3000/download?file=${encodeURIComponent(
+                  fileName
+                )}`;
+                downloadButton.classList.add(
+                  "btn",
+                  "btn-primary",
+                  "btn-sm",
+                  "ml-auto"
+                );
 
                 fileDiv.appendChild(fileNameSpan);
                 fileDiv.appendChild(downloadButton);
@@ -149,7 +189,7 @@
           resultContainer.style.display = "none";
 
           // Reverse countdown logic
-          console.log(quiz.timeLimit);
+          //   console.log(quiz.timeLimit);
           let countdownValue = quiz.timeLimit; // start from 10 seconds
           countdown.textContent = `${countdownValue}s`;
 
@@ -177,8 +217,26 @@
               score++;
             }
           });
+          fetch("http://localhost:3000/updatePoints", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              earnedPoints: score,
+              id: sessionStorage.getItem("id"),
+            }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              alert("Successfully updated points");
+            })
+            .catch((err) => {
+              alert("Err ", err);
+            });
 
           scoreElement.textContent = `You scored ${score} out of ${currentQuiz.questions.length}`;
+          displayshowUserInfo();
           quizContainer.style.display = "none";
           resultContainer.style.display = "block";
         });
