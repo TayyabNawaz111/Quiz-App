@@ -6,6 +6,7 @@ const formidable = require("formidable");
 let { users } = require("./data/users");
 let { quizzes } = require("./data/quizzes");
 let { fileNames } = require("./data/fileNames");
+let { Chat } = require("./data/chat");
 const server = http.createServer((req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
@@ -20,13 +21,17 @@ const server = http.createServer((req, res) => {
         res.writeHead(200, { "Content-Type": "text/html" });
         res.end(data);
       });
-    }else if(req.url==="/leaderboard"){
+    } else if (req.url === "/chat-room") {
+      fs.readFile("./public/chat-room.ejs", (err, data) => {
+        res.writeHead(200, { "Content-Type": "text/html" });
+        res.end(data);
+      });
+    } else if (req.url === "/leaderboard") {
       fs.readFile("./public/leaderboard.ejs", (err, data) => {
         res.writeHead(200, { "Content-Type": "text/html" });
         res.end(data);
       });
-    }
-     else if (req.url === "/student") {
+    } else if (req.url === "/student") {
       fs.readFile("./public/student.ejs", (err, data) => {
         res.writeHead(200, { "Content-Type": "text/html" });
         res.end(data);
@@ -44,6 +49,9 @@ const server = http.createServer((req, res) => {
     } else if (req.url === "/users") {
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify(users));
+    } else if (req.url === "/chat") {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(Chat));
     } else if (req.url === "/quizzes") {
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify(quizzes));
@@ -146,6 +154,49 @@ const server = http.createServer((req, res) => {
               }
             }
           );
+        } else if (req.url === "/new-chat") {
+          const { newMessage } = JSON.parse(body);
+          // console.log(newMessage);
+          const currentUser = Chat.find(
+            (chat) => chat.user_id == newMessage.user_id
+          );
+          if (currentUser) {
+            const msg = {
+              text: newMessage.text,
+              timestamp: newMessage.timestamp,
+            };
+            currentUser.messages.push(msg);
+          } else {
+            const newChat = {
+              user_id: newMessage.user_id,
+              messages: [
+                {
+                  text: newMessage.text,
+                  timestamp: newMessage.timestamp,
+                },
+              ],
+            };
+            Chat.push(newChat);
+          }
+          fs.writeFile(
+            "./data/chat.js",
+            `module.exports = ${JSON.stringify({ Chat }, null, 4)}`,
+            (err) => {
+              if (err) {
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(
+                  JSON.stringify({ error: "Failed to update user's chat" })
+                );
+              } else {
+                res.writeHead(200, { "Content-Type": "application/json" });
+                if (currentUser) {
+                  res.end(JSON.stringify(currentUser));
+                } else {
+                  res.end(JSON.stringify({ success: true }));
+                }
+              }
+            }
+          );
         } else if (req.url === "/updatePoints") {
           const { earnedPoints, id } = JSON.parse(body);
           const currentUser = users.find((user) => user.id == id);
@@ -164,12 +215,9 @@ const server = http.createServer((req, res) => {
               }
             }
           );
-
-
-          //----------------------------------------
         } else if (req.url === "/login") {
           const { email, password } = JSON.parse(body);
-          console.log("Received email:", email);
+          // console.log("Received email:", email);
           const user = users.find((u) => u.email === email);
 
           if (user && user.pass === password) {

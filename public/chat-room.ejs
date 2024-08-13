@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat Room</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      #chat-box {
+        height: 400px; /* Adjust as needed */
+        overflow-y: scroll;
+        border: 1px solid #ddd; /* Optional: for visual debugging */
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#">Chat Room</a>
+    </nav>
+
+    <!-- Chat Room Container -->
+    <div class="container mt-5">
+      <div class="row">
+        <div class="col-12 col-md-8 mx-auto">
+          <!-- Chat Box -->
+          <div class="card">
+            <div class="card-header bg-primary text-white">Chat Room</div>
+            <div class="card-body" id="chat-box">
+              <!-- Chat messages will be dynamically inserted here -->
+            </div>
+            <div class="card-footer">
+              <form id="chat-form">
+                <div class="input-group">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Type a message..."
+                    required
+                    id="message-input"
+                  />
+                  <div class="input-group-append">
+                    <button class="btn btn-primary" type="submit">Send</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS, Popper.js, and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        let users = [];
+        fetch("http://localhost:3000/users", {
+          mode: "cors",
+          method: "GET",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            users = data;
+          })
+          .catch((err) => {
+            console.log("Err: ", err);
+          });
+        function fetchMessages() {
+          fetch("http://localhost:3000/chat", { mode: "cors", method: "GET" })
+            .then((response) => response.json())
+            .then((data) => {
+              console.log("Fetched data: ", data); // Log the data to inspect its structure
+
+              // Flatten all messages into a single array
+              const allMessages = data.flatMap((user) => user.messages);
+
+              // Sort the messages by timestamp
+              allMessages.sort(
+                (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
+              );
+
+              // Display the sorted messages
+              displayMessages(allMessages, data);
+            })
+            .catch((err) => {
+              console.error("Error fetching messages: ", err);
+            });
+        }
+
+        function displayMessages(allMessages, userData) {
+          const chatBox = document.getElementById("chat-box");
+          chatBox.innerHTML = ""; // Clear existing messages
+
+          allMessages.forEach((message) => {
+            const user = userData.find((u) =>
+              u.messages.some((msg) => msg.timestamp === message.timestamp)
+            );
+            const messageElement = document.createElement("div");
+            if (user.user_id == sessionStorage.getItem("id")) {
+              messageElement.classList.add(
+                "chat-message",
+                "mb-3",
+                "text-right"
+              );
+              messageElement.innerHTML = `<strong>You:</strong> ${message.text}`;
+            } else {
+              let currentUser = users.find(
+                (current) => current.id == user.user_id
+              );
+              messageElement.classList.add("chat-message", "mb-3");
+              messageElement.innerHTML = `<strong>${currentUser.name}: </strong> ${message.text}`;
+            }
+            chatBox.appendChild(messageElement);
+          });
+
+          // Ensure the chat box scrolls to the bottom after messages are appended
+          chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        fetchMessages();
+
+        // Handle new message submission
+        document.getElementById("chat-form").addEventListener("submit", (e) => {
+          e.preventDefault();
+          const messageInput = document.getElementById("message-input");
+          const messageText = messageInput.value.trim();
+
+          if (messageText) {
+            messageInput.value = ""; // Clear the input field
+            const msg = {
+              user_id: sessionStorage.getItem("id"),
+              text: messageText,
+              timestamp: new Date().toISOString(),
+            };
+
+            fetch("http://localhost:3000/new-chat", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ newMessage: msg }),
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                console.log("Successfully sent new message");
+                fetchMessages(); // Refresh messages
+              })
+              .catch((err) => {
+                console.error("Error sending message: ", err);
+              });
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
