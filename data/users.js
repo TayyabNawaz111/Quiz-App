@@ -6,7 +6,7 @@ module.exports = {
             "name": "Tayyab",
             "email": "tayyab111@gmail.com",
             "pass": "tayyab",
-            "points": 8
+            "points": 15
         },
         {
             "id": 2,
@@ -28,7 +28,7 @@ module.exports = {
             "name": "Nawaz Ahmad",
             "email": "nawaz@gmail.com",
             "pass": "nawaz",
-            "points": 14
+            "points": 21
         }
     ]
 }
